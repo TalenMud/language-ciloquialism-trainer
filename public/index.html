@@ -1,43 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dialect Dash</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Space+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    <main class="app">
+      <section id="startScreen" class="screen">
+        <div class="start-card">
+          <div class="title">Dialect Dash</div>
+          <div class="high-score">High score: <span id="highScore">0</span></div>
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+          <div class="group">
+            <div class="label">Choose a dialect</div>
+            <div id="dialectOptions" class="option-row"></div>
+          </div>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+          <div class="group">
+            <div class="label">Difficulty</div>
+            <div id="difficultyOptions" class="option-row"></div>
+          </div>
+
+          <button id="startBtn" class="start-btn" disabled>Start</button>
+        </div>
+      </section>
+
+      <section id="playScreen" class="screen hidden">
+        <div class="hud">
+          <div>Dialect: <span id="dialectValue"></span></div>
+          <div>Difficulty: <span id="difficultyValue"></span></div>
+          <div>Score: <span id="scoreValue">0</span></div>
+          <div>High score: <span id="highScorePlay">0</span></div>
+        </div>
+
+        <div class="snippet-card">
+          <div class="snippet-title">Listen to the snippet</div>
+          <button id="playSnippet" class="secondary">Play snippet</button>
+        </div>
+
+        <div id="options" class="options"></div>
+
+        <button id="endBtn" class="secondary">End run</button>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
   </body>
 </html>
