@@ -32,6 +32,12 @@
   const optionsEl = document.getElementById("options");
   const endBtn = document.getElementById("endBtn");
 
+  const gameOverModal = document.getElementById("gameOverModal");
+  const finalScoreEl = document.getElementById("finalScore");
+  const finalHighScoreEl = document.getElementById("finalHighScore");
+  const retryBtn = document.getElementById("retryBtn");
+  const homeBtn = document.getElementById("homeBtn");
+
   let difficultyKey = "easy";
   let dialectKey = "";
   let currentSnippet = "";
@@ -307,8 +313,7 @@
 
     // Check if dead
     if (lives <= 0) {
-      alert("Game Over!");
-      endGame();
+      showGameOver();
     } else {
       // Load next question
       loadRound();
@@ -384,10 +389,33 @@
     setScreen("start");
   };
 
+  const showGameOver = () => {
+  // Update the stats in the modal
+  finalScoreEl.textContent = score;
+  finalHighScoreEl.textContent = getHighScore();
+  
+  // Play sad sound
+  playGameOverSound();
+
+  // Show Modal
+  gameOverModal.classList.remove("hidden");
+  
+  // Hide the gameplay footer just in case
+  footerEl.classList.add("hidden");
+};
+
   startBtn.addEventListener("click", startGame);
   continueBtn.addEventListener("click", handleContinue);
   playSnippetBtn.addEventListener("click", playSnippet);
   endBtn.addEventListener("click", endGame);
+  retryBtn.addEventListener("click", () => {
+    gameOverModal.classList.add("hidden");
+    startGame();
+  });
+  homeBtn.addEventListener("click", () => {
+    gameOverModal.classList.add("hidden");
+    endGame();
+  });
 
   setHighScore(getHighScore());
   renderDialects();
@@ -422,6 +450,27 @@ function playSuccessSound() {
   gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5); // Fade out
 
   // Start and stop
+  oscillator.start(now);
+  oscillator.stop(now + 0.6);
+}
+
+function playGameOverSound() {
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  
+  // Sawtooth wave sounds a bit buzzier/sadder
+  oscillator.type = "sawtooth"; 
+  const now = audioCtx.currentTime;
+
+  // Sliding pitch down (Sad trombone effect)
+  oscillator.frequency.setValueAtTime(300, now); 
+  oscillator.frequency.exponentialRampToValueAtTime(100, now + 0.6);
+
+  gainNode.gain.setValueAtTime(0.2, now);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+
   oscillator.start(now);
   oscillator.stop(now + 0.6);
 }

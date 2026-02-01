@@ -58,7 +58,31 @@
 
         <button id="endBtn" class="secondary">End run</button>
       </section>
+      <div id="gameOverModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-icon">💔</div>
+      <h2 class="modal-title">Out of hearts!</h2>
+      <p class="modal-subtitle">Better luck next time.</p>
+      
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Score</div>
+          <div class="stat-value" id="finalScore">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Best</div>
+          <div class="stat-value" id="finalHighScore">0</div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="retryBtn" class="action-btn full-width">Try Again</button>
+        <button id="homeBtn" class="secondary full-width">Main Menu</button>
+      </div>
+    </div>
+  </div>
     </main>
+
 
     <script src="app.js"></script>
   </body>
