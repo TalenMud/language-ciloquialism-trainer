@@ -52,6 +52,8 @@ button {
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
   display: grid;
   gap: 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .title {
@@ -118,6 +120,33 @@ button {
   gap: 14px 24px;
   margin-bottom: 20px;
   color: var(--ink-soft);
+}
+
+.hud > div {
+  background: rgba(255, 255, 255, 0.5);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+#playSnippet {
+  background: var(--sun);
+  border-color: #dfa648;
+  color: var(--ink);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.1s ease;
+}
+
+#playSnippet:active {
+  transform: scale(0.96);
 }
 
 .snippet-card {
@@ -193,4 +222,95 @@ button {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+.wrong-answer {
+  background-color: #ff4b4b !important; /* Red */
+  color: white !important;
+  border-color: #d32f2f !important;
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* --- FOOTER & FEEDBACK STYLES --- */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px;
+  background: white;
+  border-top: 2px solid var(--stroke);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+  z-index: 100;
+  /* Animation to slide up */
+  animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.footer.hidden {
+  display: none;
+}
+
+/* Green Footer (Correct) */
+.footer.correct {
+  background-color: #d7ffb8;
+  border-color: #b8e6a0;
+}
+
+/* Red Footer (Wrong) */
+.footer.wrong {
+  background-color: #ffdfe0;
+  border-color: #ffc1c1;
+}
+
+/* The Continue Button */
+.action-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+}
+
+/* Green Button style */
+.footer.correct .action-btn {
+  background: #58cc02;
+  box-shadow: 0 4px 0 #46a302;
+}
+
+/* Red Button style */
+.footer.wrong .action-btn {
+  background: #ff4b4b;
+  box-shadow: 0 4px 0 #ea2b2b;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Force colors on the answer buttons */
+.option.correct-answer {
+  background-color: #58cc02 !important;
+  color: white !important;
+  border-color: #46a302 !important;
+}
+
+.option.wrong-answer {
+  background-color: #ff4b4b !important;
+  color: white !important;
+  border-color: #ea2b2b !important;
+  opacity: 0.6;
 }

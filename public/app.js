@@ -13,6 +13,9 @@
 
   const HIGH_SCORE_COOKIE = "dialect_dash_high_score";
 
+  const footerEl = document.getElementById("footer");
+  const continueBtn = document.getElementById("continueBtn");
+  const feedbackText = document.getElementById("feedbackText");
   const startScreen = document.getElementById("startScreen");
   const playScreen = document.getElementById("playScreen");
   const startBtn = document.getElementById("startBtn");
@@ -24,6 +27,7 @@
   const dialectValue = document.getElementById("dialectValue");
   const difficultyValue = document.getElementById("difficultyValue");
   const scoreValue = document.getElementById("scoreValue");
+  const livesValue = document.getElementById("livesValue");
   const playSnippetBtn = document.getElementById("playSnippet");
   const optionsEl = document.getElementById("options");
   const endBtn = document.getElementById("endBtn");
@@ -32,6 +36,7 @@
   let dialectKey = "";
   let currentSnippet = "";
   let score = 0;
+  let lives = 3;
   let audio = null;
 
   const getCookie = (name) => {
@@ -109,6 +114,7 @@
     dialectValue.textContent = DIALECTS[dialectKey] || "";
     difficultyValue.textContent = DIFFICULTY[difficultyKey].label;
     scoreValue.textContent = score;
+    livesValue.textContent = "❤️".repeat(lives);
     const high = getHighScore();
     highScorePlayEl.textContent = high;
   };
@@ -148,7 +154,7 @@
       btn.type = "button";
       btn.className = "option";
       btn.textContent = option;
-      btn.addEventListener("click", () => handleChoice(option));
+      btn.addEventListener("click", (e) => handleChoice(option, e.target));
       optionsEl.appendChild(btn);
     });
   };
@@ -202,19 +208,78 @@
     playSnippet();
   };
 
-  const handleChoice = (choice) => {
-    if (choice === currentSnippet) {
+  const handleContinue = () => {
+    // Hide the footer
+    footerEl.classList.add("hidden");
+    footerEl.classList.remove("correct", "wrong");
+
+    // Re-enable clicking
+    optionsEl.style.pointerEvents = "auto";
+
+    // Check if dead
+    if (lives <= 0) {
+      alert("Game Over!");
+      endGame();
+    } else {
+      // Load next question
+      loadRound();
+    }
+  };
+
+  const handleChoice = (choice, btnElement) => {
+    // 1. Lock the screen so they can't click other buttons
+    optionsEl.style.pointerEvents = "none";
+    
+    const isCorrect = choice === currentSnippet;
+
+    // 2. Show the Footer
+    footerEl.classList.remove("hidden");
+
+    if (isCorrect) {
+      // --- CORRECT ---
+      btnElement.classList.add("correct-answer");
+      
+      // Make footer Green
+      footerEl.classList.add("correct");
+      feedbackText.textContent = "Nicely done!";
+      feedbackText.style.color = "#46a302";
+      feedbackText.style.fontWeight = "bold";
+
+      playSuccessSound();
       score += 10;
-      updateHud();
+      
+      // Update Score
       const high = getHighScore();
       if (score > high) setHighScore(score);
+      updateHud();
+
+    } else {
+      // --- WRONG ---
+      btnElement.classList.add("wrong-answer");
+      
+      // Make footer Red
+      footerEl.classList.add("wrong");
+      feedbackText.textContent = `Correct answer: ${currentSnippet}`;
+      feedbackText.style.color = "#ea2b2b";
+      feedbackText.style.fontWeight = "bold";
+
+      // Highlight the REAL answer in Green so they learn
+      const allButtons = document.querySelectorAll(".option");
+      allButtons.forEach(btn => {
+        if (btn.textContent === currentSnippet) {
+          btn.classList.add("correct-answer");
+        }
+      });
+
+      lives -= 1;
+      updateHud();
     }
-    loadRound();
   };
 
   const startGame = async () => {
     if (!dialectKey) return;
     score = 0;
+    lives = 3;
     updateHud();
     setScreen("play");
     await loadRound();
@@ -223,10 +288,14 @@
   const endGame = () => {
     const high = getHighScore();
     if (score > high) setHighScore(score);
+    footerEl.classList.add("hidden");
+    footerEl.classList.remove("correct", "wrong");
+    optionsEl.style.pointerEvents = "auto";
     setScreen("start");
   };
 
   startBtn.addEventListener("click", startGame);
+  continueBtn.addEventListener("click", handleContinue);
   playSnippetBtn.addEventListener("click", playSnippet);
   endBtn.addEventListener("click", endGame);
 
@@ -235,3 +304,34 @@
   renderDifficulty();
   updateHud();
 })();
+
+
+// --- 🔊 The "Duolingo" Sound Engine ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSuccessSound() {
+  // Create an oscillator (the thing that makes noise)
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  // Set the "Ding" shape (Sine wave is smooth like a bell)
+  oscillator.type = "sine";
+
+  const now = audioCtx.currentTime;
+
+  // 🎵 THE NOTES: F#5 -> A#5 (The Happy Major Third)
+  oscillator.frequency.setValueAtTime(739.99, now); // F# (Da...)
+  oscillator.frequency.setValueAtTime(932.33, now + 0.1); // A# (...Ding!)
+
+  // 📉 THE FADE: Fast attack, slow decay
+  gainNode.gain.setValueAtTime(0, now);
+  gainNode.gain.linearRampToValueAtTime(0.3, now + 0.05); // Volume up
+  gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5); // Fade out
+
+  // Start and stop
+  oscillator.start(now);
+  oscillator.stop(now + 0.6);
+}

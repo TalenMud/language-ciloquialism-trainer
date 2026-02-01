@@ -36,6 +36,8 @@
 
       <section id="playScreen" class="screen hidden">
         <div class="hud">
+          <div>Lives: <span id="livesValue">❤️❤️❤️</span></div>
+
           <div>Dialect: <span id="dialectValue"></span></div>
           <div>Difficulty: <span id="difficultyValue"></span></div>
           <div>Score: <span id="scoreValue">0</span></div>
@@ -44,10 +46,14 @@
 
         <div class="snippet-card">
           <div class="snippet-title">Listen to the snippet</div>
-          <button id="playSnippet" class="secondary">Play snippet</button>
+          <button id="playSnippet" class="secondary">🔊 Play snippet</button>
         </div>
 
         <div id="options" class="options"></div>
+          <div id="footer" class="footer hidden">
+            <div id="feedbackText"></div>
+            <button id="continueBtn" class="action-btn">Continue</button>
+          </div>
 
         <button id="endBtn" class="secondary">End run</button>
       </section>
