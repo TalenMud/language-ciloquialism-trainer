@@ -31,6 +31,7 @@
   let difficultyKey = "easy";
   let dialectKey = "";
   let currentSnippet = "";
+  let currentAudioUrl = "";
   let score = 0;
   let audio = null;
 
@@ -116,26 +117,86 @@
   const fetchSnippet = async () => {
     const response = await fetch(`/api/snippet?dialect=${encodeURIComponent(dialectKey || "british")}`);
     if (!response.ok) throw new Error("snippet-failed");
-    const data = await response.json();
-    return data.text;
+    return response.json();
   };
 
   const makeOptionsPlaceholder = (correctText, count) => {
-    // Placeholder option generator; replace with real logic later.
-    const filler = [
-      "placeholder phrase one",
-      "placeholder phrase two",
-      "placeholder phrase three",
-      "placeholder phrase four",
-      "placeholder phrase five",
+    // Placeholder option generator; returns clearly different options (not paraphrases).
+    const wrongPool = [
+      "I missed the bus this morning",
+      "The shop closes at six",
+      "We met by the river",
+      "She left her keys at home",
+      "The weather looks stormy",
+      "Dinner is in the oven",
+      "He paid with cash",
+      "They moved last summer",
+      "The train is delayed",
+      "I found it on the table",
+      "We took a different route",
+      "The concert starts soon",
+      "He forgot his wallet",
+      "The cafe is busy today",
+      "We need more chairs",
+      "She called a taxi",
+      "The meeting ran late",
+      "I spilled my coffee",
+      "The lights went out",
+      "We watched a movie",
     ];
 
+    const normalize = (value) =>
+      value
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, "")
+        .trim();
+
+    const tooSimilar = (candidate) => {
+      const a = normalize(correctText);
+      const b = normalize(candidate);
+      if (!a || !b) return false;
+      if (a === b) return true;
+
+      const aTokens = new Set(a.split(/\s+/).filter(Boolean));
+      const bTokens = new Set(b.split(/\s+/).filter(Boolean));
+      let intersection = 0;
+      aTokens.forEach((token) => {
+        if (bTokens.has(token)) intersection += 1;
+      });
+      const union = aTokens.size + bTokens.size - intersection;
+      const score = union ? intersection / union : 0;
+      return score > 0.45;
+    };
+
     const options = new Set([correctText]);
-    let index = 0;
-    while (options.size < count) {
-      options.add(filler[index % filler.length]);
-      index += 1;
+    const shuffledPool = shuffle([...wrongPool]);
+    for (const phrase of shuffledPool) {
+      if (options.size >= count) break;
+      if (!tooSimilar(phrase)) options.add(phrase);
     }
+
+    const wrongWords = [
+      "bananas",
+      "tickets",
+      "windows",
+      "shoes",
+      "snow",
+      "bikes",
+      "letters",
+      "kittens",
+    ];
+
+    let attempts = 0;
+    while (options.size < count && attempts < 24) {
+      attempts += 1;
+      const parts = correctText.split(" ");
+      if (!parts.length) break;
+      const index = Math.floor(Math.random() * parts.length);
+      const replacement = wrongWords[Math.floor(Math.random() * wrongWords.length)];
+      const candidate = parts.map((word, i) => (i === index ? replacement : word)).join(" ");
+      if (!tooSimilar(candidate)) options.add(candidate);
+    }
+
     return shuffle(Array.from(options));
   };
 
@@ -164,38 +225,33 @@
 
   const playSnippet = async () => {
     if (!currentSnippet) return;
+    if (!currentAudioUrl) {
+      speakLocal(currentSnippet);
+      return;
+    }
+
+    if (audio) {
+      audio.pause();
+    }
+
+    audio = new Audio(currentAudioUrl);
+    audio.onerror = () => {
+      console.warn("[Audio] Clip failed; falling back to SpeechSynthesis.");
+      speakLocal(currentSnippet);
+    };
+
     try {
-      console.info(`[TTS] Requesting ElevenLabs for accent=${dialectKey || "british"}`);
-      const res = await fetch(
-        `/api/tts?text=${encodeURIComponent(currentSnippet)}&accent=${encodeURIComponent(
-          dialectKey || "british"
-        )}`
-      );
-      if (!res.ok) throw new Error("tts-failed");
-      const blob = await res.blob();
-      if (!blob.size) throw new Error("tts-empty");
-
-      if (audio) {
-        audio.pause();
-        if (audio.src && audio.src.startsWith("blob:")) {
-          URL.revokeObjectURL(audio.src);
-        }
-      }
-
-      const url = URL.createObjectURL(blob);
-      audio = new Audio(url);
-      audio.onended = () => {
-        URL.revokeObjectURL(url);
-      };
       await audio.play();
     } catch (err) {
-      console.warn("[TTS] ElevenLabs failed; falling back to SpeechSynthesis.");
+      console.warn("[Audio] Playback failed; falling back to SpeechSynthesis.");
       speakLocal(currentSnippet);
     }
   };
 
   const loadRound = async () => {
-    currentSnippet = await fetchSnippet();
+    const data = await fetchSnippet();
+    currentSnippet = data.text;
+    currentAudioUrl = data.audioUrl || "";
     const optionCount = DIFFICULTY[difficultyKey].options;
     const options = makeOptionsPlaceholder(currentSnippet, optionCount);
     renderOptions(options);
