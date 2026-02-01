@@ -39,6 +39,7 @@
   let score = 0;
   let lives = 3;
   let audio = null;
+  let manifest = null;
   let clipPool = [];
   let clipQueue = [];
 
@@ -124,23 +125,23 @@
     highScorePlayEl.textContent = high;
   };
 
-  const fetchSnippet = async () => {
-    const response = await fetch(`/api/snippet?dialect=${encodeURIComponent(dialectKey || "british")}`);
-    if (!response.ok) throw new Error("snippet-failed");
-    return response.json();
+  const loadManifest = async () => {
+    if (manifest) return manifest;
+    const response = await fetch("voice-clips.json");
+    if (!response.ok) throw new Error("manifest-failed");
+    manifest = await response.json();
+    return manifest;
   };
 
-  const fetchClips = async () => {
-    const response = await fetch(`/api/snippets?dialect=${encodeURIComponent(dialectKey || "british")}`);
-    if (!response.ok) throw new Error("snippets-failed");
-    const data = await response.json();
-    if (!data || !Array.isArray(data.clips)) return [];
-    return data.clips;
+  const getClipsForDialect = async () => {
+    const data = await loadManifest();
+    const list = data && Array.isArray(data[dialectKey]) ? data[dialectKey] : [];
+    return list;
   };
 
   const prepareClipQueue = async () => {
     try {
-      clipPool = await fetchClips();
+      clipPool = await getClipsForDialect();
     } catch (err) {
       clipPool = [];
     }
@@ -149,14 +150,13 @@
 
   const getNextClip = async () => {
     if (!clipPool.length) {
-      const data = await fetchSnippet();
-      return { text: data.text, audioUrl: data.audioUrl || "" };
+      return { text: "No clip available", audioUrl: "" };
     }
     if (!clipQueue.length) {
       clipQueue = shuffle([...clipPool]);
     }
     const next = clipQueue.shift();
-    return next || { text: "", audioUrl: "" };
+    return next || { text: "No clip available", audioUrl: "" };
   };
 
   const makeOptionsPlaceholder = (correctText, count) => {
@@ -273,7 +273,7 @@
       audio.pause();
     }
 
-    audio = new Audio(currentAudioUrl);
+    audio = new Audio(encodeURI(currentAudioUrl));
     audio.onerror = () => {
       console.warn("[Audio] Clip failed; falling back to SpeechSynthesis.");
       speakLocal(currentSnippet);

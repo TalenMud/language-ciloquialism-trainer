@@ -1,0 +1,60 @@
+{
+  "irish": [
+    {
+      "text": "That's grand altogether",
+      "audioUrl": "voice clips/Irish/Irish - That's grand altogether.mp3"
+    },
+    {
+      "text": "She's a wee legend",
+      "audioUrl": "voice clips/Irish/Irish - She's a wee legend.mp3"
+    },
+    {
+      "text": "You're sound thanks",
+      "audioUrl": "voice clips/Irish/Irish - You're sound thanks.mp3"
+    },
+    {
+      "text": "We had some craic last night",
+      "audioUrl": "voice clips/Irish/We had some craic last night.mp3"
+    }
+  ],
+  "british": [
+    {
+      "text": "fancy going to the pub",
+      "audioUrl": "voice clips/brit/British (northern) - fancy going to the pub.mp3"
+    },
+    {
+      "text": "He's having a laugh",
+      "audioUrl": "voice clips/brit/british (northern) - He's having a laugh.mp3"
+    },
+    {
+      "text": "That's a banging tune",
+      "audioUrl": "voice clips/brit/British (northern) - That's a banging tune.mp3"
+    },
+    {
+      "text": "That's proper brilliant",
+      "audioUrl": "voice clips/brit/British (northern) - That's proper brilliant.mp3"
+    },
+    {
+      "text": "You alright mate",
+      "audioUrl": "voice clips/brit/British (northern) - You alright mate.mp3"
+    }
+  ],
+  "australian": [
+    {
+      "text": "Chuck it in the esky",
+      "audioUrl": "voice clips/aussie/Aussie - Chuck it in the esky.mp3"
+    },
+    {
+      "text": "Grab some brekkie",
+      "audioUrl": "voice clips/aussie/Aussie - Grab some brekkie.mp3"
+    },
+    {
+      "text": "No worries mate",
+      "audioUrl": "voice clips/aussie/Aussie - No worries mate.mp3"
+    },
+    {
+      "text": "See you this arvo",
+      "audioUrl": "voice clips/aussie/Aussie - See you this arvo.mp3"
+    }
+  ]
+}
