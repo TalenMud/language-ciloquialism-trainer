@@ -34,6 +34,8 @@
   let currentAudioUrl = "";
   let score = 0;
   let audio = null;
+  let clipPool = [];
+  let clipQueue = [];
 
   const getCookie = (name) => {
     const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
@@ -74,6 +76,8 @@
       btn.textContent = DIALECTS[key];
       btn.addEventListener("click", () => {
         dialectKey = key;
+        clipPool = [];
+        clipQueue = [];
         renderDialects();
         startBtn.disabled = !dialectKey;
       });
@@ -118,6 +122,35 @@
     const response = await fetch(`/api/snippet?dialect=${encodeURIComponent(dialectKey || "british")}`);
     if (!response.ok) throw new Error("snippet-failed");
     return response.json();
+  };
+
+  const fetchClips = async () => {
+    const response = await fetch(`/api/snippets?dialect=${encodeURIComponent(dialectKey || "british")}`);
+    if (!response.ok) throw new Error("snippets-failed");
+    const data = await response.json();
+    if (!data || !Array.isArray(data.clips)) return [];
+    return data.clips;
+  };
+
+  const prepareClipQueue = async () => {
+    try {
+      clipPool = await fetchClips();
+    } catch (err) {
+      clipPool = [];
+    }
+    clipQueue = shuffle([...clipPool]);
+  };
+
+  const getNextClip = async () => {
+    if (!clipPool.length) {
+      const data = await fetchSnippet();
+      return { text: data.text, audioUrl: data.audioUrl || "" };
+    }
+    if (!clipQueue.length) {
+      clipQueue = shuffle([...clipPool]);
+    }
+    const next = clipQueue.shift();
+    return next || { text: "", audioUrl: "" };
   };
 
   const makeOptionsPlaceholder = (correctText, count) => {
@@ -249,7 +282,7 @@
   };
 
   const loadRound = async () => {
-    const data = await fetchSnippet();
+    const data = await getNextClip();
     currentSnippet = data.text;
     currentAudioUrl = data.audioUrl || "";
     const optionCount = DIFFICULTY[difficultyKey].options;
@@ -273,6 +306,7 @@
     score = 0;
     updateHud();
     setScreen("play");
+    await prepareClipQueue();
     await loadRound();
   };
 

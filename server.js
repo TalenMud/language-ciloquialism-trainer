@@ -71,6 +71,16 @@ app.get("/api/snippet", (req, res) => {
   res.json({ text: clip.text, dialect, audioUrl: clip.audioUrl });
 });
 
+app.get("/api/snippets", (req, res) => {
+  const dialect = String(req.query.dialect || "british").toLowerCase();
+  const list = CLIPS[dialect] && CLIPS[dialect].length ? CLIPS[dialect] : CLIPS.british || [];
+  if (!list.length) {
+    res.status(500).json({ error: "No clips available" });
+    return;
+  }
+  res.json({ dialect, clips: list });
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.listen(PORT, () => {
